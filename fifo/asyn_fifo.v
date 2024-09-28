@@ -1,54 +1,58 @@
-
-/******************************************************
-A fifo controller verilog descripTIon.
-******************************************************/
-module fifo(datain, rd, wr, rst, clk, dataout, full, empty);
+module fifo(
 input [7:0] datain;
 input rd, wr, rst, clk;
 output [7:0] dataout;
-output full, empty;
+output reg full, empty;
 wire [7:0] dataout;
-reg full_in, empty_in;
+);
+    
 reg [7:0] mem [15:0];
 reg [3:0] rp, wp;
-assign full = full_in;
-assign empty = empty_in;
-// memory read out
-assign dataout = mem[rp];
-// memory write in
+
 always@(posedge clk) begin
-    if(wr && ~full_in) mem[wp]<=datain;
+    if(wr && ~full_in) 
+        mem[wp]<=datain;
 end
-// memory write pointer increment
+    
 always@(posedge clk or negedge rst) begin
-    if(!rst) wp<=0;
+    if(!rst) 
+        wp<=0;
     else begin
-      if(wr && ~full_in) wp<= wp+1'b1;
+      if(wr && ~full_in) 
+          wp<= wp+1'b1;
     end
 end
-// memory read pointer increment
+
 always@(posedge clk or negedge rst)begin
-    if(!rst) rp <= 0;
+    if(!rst)
+        rp <= 0;
     else begin
-      if(rd && ~empty_in) rp <= rp + 1'b1;
+      if(rd && ~empty_in) 
+          rp <= rp + 1'b1;
     end
 end
-// Full signal generate
+    
 always@(posedge clk or negedge rst) begin
-    if(!rst) full_in <= 1'b0;
+    if(!rst) 
+        full_in <= 1'b0;
     else begin
       if( (~rd && wr)&&((wp==rp-1)||(rp==4'h0&&wp==4'hf)))
           full_in <= 1'b1;
-      else if(full_in && rd) full_in <= 1'b0;
+      else if(full_in && rd) 
+          full_in <= 1'b0;
     end
 end
-// Empty signal generate
 always@(posedge clk or negedge rst) begin
-    if(!rst) empty_in <= 1'b1;
+    if(!rst) 
+        empty_in <= 1'b1;
     else begin
       if((rd&&~wr)&&(rp==wp-1 || (rp==4'hf&&wp==4'h0)))
         empty_in<=1'b1;
-      else if(empty_in && wr) empty_in<=1'b0;
+      else if(empty_in && wr) 
+          empty_in<=1'b0;
     end
 end
+assign full = full_in;
+assign empty = empty_in;
+assign dataout = mem[rp];
 endmodule
