@@ -8,13 +8,14 @@ module round_robin(
     reg [2:0] present_state;
     reg [2:0] next_state;
 
+    // State encoding
     parameter [2:0] S_ideal = 3'b000;
     parameter [2:0] S_0 = 3'b001;
     parameter [2:0] S_1 = 3'b010;
     parameter [2:0] S_2 = 3'b011;
     parameter [2:0] S_3 = 3'b100;
 
-  
+    // State register
     always @(posedge clk or negedge rst_n) begin
         if (!rst_n)
             present_state <= S_ideal;
@@ -22,8 +23,9 @@ module round_robin(
             present_state <= next_state;
     end
 
-    
+    // Next state logic
     always @(*) begin
+        next_state = S_ideal; // Default assignment to prevent latches
         case (present_state)
             S_ideal: begin
                 if (in[0])
@@ -34,8 +36,6 @@ module round_robin(
                     next_state = S_2;
                 else if (in[3])
                     next_state = S_3;
-                else
-                    next_state = S_ideal;
             end
 
             S_0: begin
@@ -47,8 +47,6 @@ module round_robin(
                     next_state = S_3;
                 else if (in[0])
                     next_state = S_0;
-                else
-                    next_state = S_ideal;
             end
 
             S_1: begin
@@ -60,8 +58,6 @@ module round_robin(
                     next_state = S_0;
                 else if (in[1])
                     next_state = S_1;
-                else
-                    next_state = S_ideal;
             end
 
             S_2: begin
@@ -73,8 +69,6 @@ module round_robin(
                     next_state = S_1;
                 else if (in[2])
                     next_state = S_2;
-                else
-                    next_state = S_ideal;
             end
 
             S_3: begin
@@ -86,25 +80,13 @@ module round_robin(
                     next_state = S_2;
                 else if (in[3])
                     next_state = S_3;
-                else
-                    next_state = S_ideal;
             end
 
-            default: begin
-                if (in[0])
-                    next_state = S_0;
-                else if (in[1])
-                    next_state = S_1;
-                else if (in[2])
-                    next_state = S_2;
-                else if (in[3])
-                    next_state = S_3;
-                else
-                    next_state = S_ideal;
-            end
+            default: next_state = S_ideal;
         endcase
     end
 
+    // Output logic
     always @(*) begin
         case (present_state)
             S_0: out = 4'b0001;
